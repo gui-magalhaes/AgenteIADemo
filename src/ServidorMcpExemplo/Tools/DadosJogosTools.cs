@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.AI;
+﻿using ModelContextProtocol.Server;
 using System.ComponentModel;
 
-namespace AplicacaoAgenteIA.Core.ConexaoIA;
+namespace ServidorMcpExemplo.Tools;
 
 internal enum GeneroDeJogo
 {
@@ -12,12 +12,13 @@ internal enum GeneroDeJogo
 	Sandbox
 };
 
-internal static class FerramentasFake
+[McpServerToolType]
+internal class DadosJogosTools
 {
-
+	[McpServerTool(Name = "BuscarJogosMaisVendidos")]
 	[Description("Busca os 5 jogos mais vendidos, opcionalmente filtrado por gênero")]
 	public static List<string> BuscarJogosMaisVendidos(
-		[Description("Gênero para filtrar o ranking. Omita este parâmetro para retornar o ranking geral (todos os gêneros).")] GeneroDeJogo? genero)
+	[Description("Gênero para filtrar o ranking. Omita este parâmetro para retornar o ranking geral (todos os gêneros).")] GeneroDeJogo? genero)
 	{
 		string textoDebug = "Consultei os 5 jogos mais vendidos";
 		if (genero != null)
@@ -33,10 +34,5 @@ internal static class FerramentasFake
 			"Minecraft 5: O Fim"
 		];
 	}
-
-	public static List<AITool> ObterTodas() =>
-	[
-		AIFunctionFactory.Create(BuscarJogosMaisVendidos),
-	];
 }
 

@@ -5,6 +5,7 @@ using AplicacaoAgenteIA.Core.Contexto;
 using AplicacaoAgenteIA.Core.Contexto.Interfaces;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
+using ModelContextProtocol.Client;
 using ClienteAnthropic = Anthropic.AnthropicClient;
 using ClienteGoogle = Google.GenAI.Client;
 using ClienteOpenAI = OpenAI.Chat.ChatClient;
@@ -19,14 +20,33 @@ public class ConexaoIAFactory
 		_configuracao = configuracao;
 	}
 
-	public IConexaoIA CriarConexao(ProvedorIA provedor, string promptSistema)
+	public async Task<IConexaoIA> CriarConexaoAsync(ProvedorIA provedor, string promptSistema)
 	{
 		IChatClient cliente = CriarClienteBuilder(provedor)
 			.UseFunctionInvocation()
 			.Build();
+
+		McpClient clienteMcp = await CriarClienteMcpAsync();
+		IList<McpClientTool> ferramentasMcp = await clienteMcp.ListToolsAsync();
+
 		IContextoIA contexto = new ContextoIA(promptSistema);
 
-		return new ConexaoIA(cliente, contexto, FerramentasFake.ObterTodas());
+		return new ConexaoIA(cliente, clienteMcp, contexto, ferramentasMcp.Cast<AITool>().ToList());
+	}
+
+	private async Task<McpClient> CriarClienteMcpAsync()
+	{
+		string? comando = _configuracao["Mcp:Comando"] ?? throw new Exception("Não encontrei o comando do servidor MCP.");
+		string[] argumentos = _configuracao.GetSection("Mcp:Argumentos").Get<string[]>()
+			?? throw new Exception("Não encontrei os argumentos do servidor MCP.");
+
+		return await McpClient.CreateAsync(
+			new StdioClientTransport(new StdioClientTransportOptions
+			{
+				Name = "ServidorMcpExemplo",
+				Command = comando,
+				Arguments = argumentos
+			}));
 	}
 
 	private ChatClientBuilder CriarClienteBuilder(ProvedorIA provedor)

@@ -2,7 +2,7 @@
 
 namespace AplicacaoAgenteIA.Core.ConexaoIA.Interfaces;
 
-public interface IConexaoIA : IDisposable
+public interface IConexaoIA : IAsyncDisposable
 {
 	Task<ChatResponse> ObterRespostaAsync();
 	IAsyncEnumerable<ChatResponseUpdate> ObterRespostaEmStreamAsync();

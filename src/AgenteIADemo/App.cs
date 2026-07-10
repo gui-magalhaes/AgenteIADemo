@@ -15,7 +15,7 @@ internal class App
 
 	public async Task ExecutarAsync()
 	{
-		using IConexaoIA conexao = _factory.CriarConexao(ProvedorIA.OpenAI, PromptsSistema.AssistenteJogos);
+		await using IConexaoIA conexao = await _factory.CriarConexaoAsync(ProvedorIA.OpenAI, PromptsSistema.AssistenteJogos);
 
 		Console.WriteLine("-== AgenteIADemo ==-");
 		Console.WriteLine("");
