@@ -1,3 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/ServidorMcpExemplo/ServidorMcpExemplo.csproj" Id="fbfff33d-25f1-4adb-9e66-70bb94f619b5" />
   <Project Path="src/AgenteIADemo/AplicacaoAgenteIA.csproj" />
 </Solution>
