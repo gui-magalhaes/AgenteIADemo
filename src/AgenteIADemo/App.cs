@@ -31,7 +31,7 @@ internal class App
 			ChatResponse resposta = await LerRespostaEmStreamAsync(conexao.ObterRespostaEmStreamAsync());
 
 			Console.WriteLine("");
-			Console.WriteLine($"[Bob usou {resposta.Usage!.TotalTokenCount} tokens para pensar nisso!]");
+			Console.WriteLine($"[Bob usou {resposta.Usage!.InputTokenCount} tokens de entrada e {resposta.Usage!.OutputTokenCount} tokens de saída para pensar nisso!]");
 
 			Console.WriteLine("");
 		}
