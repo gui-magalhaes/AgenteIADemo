@@ -1,4 +1,5 @@
 ﻿using AplicacaoAgenteIA.Core.Contexto.Interfaces;
+using AplicacaoAgenteIA.Core.Rascunho;
 using Microsoft.Extensions.AI;
 using System.Collections;
 
@@ -10,10 +11,12 @@ internal class ContextoIA : IContextoIA
 
 	private readonly string _promptSistema;
 	private readonly List<ChatMessage> _historico = [];
+	private readonly RascunhoConversa _rascunho;
 
-	public ContextoIA(string promptSistema)
+	public ContextoIA(string promptSistema, RascunhoConversa rascunho)
 	{
 		_promptSistema = promptSistema;
+		_rascunho = rascunho;
 	}
 
 	public void AdicionarUsuario(string texto) => _historico.Add(new ChatMessage(ChatRole.User, texto));
@@ -22,11 +25,21 @@ internal class ContextoIA : IContextoIA
 
 	public IEnumerator<ChatMessage> GetEnumerator()
 	{
-		yield return new ChatMessage(ChatRole.System, _promptSistema);
+		string promptComRascunho = ObterPromptSistema();
+		yield return new ChatMessage(ChatRole.System, promptComRascunho);
 
 		foreach (var mensagem in ObterMensagensNaJanela())
 			yield return mensagem;
 	}
+
+	private string ObterPromptSistema()
+		=> $"""
+		{_promptSistema}
+		
+
+		Dados já coletados nesta conversa: 
+		{_rascunho.ParaJson()}
+		""";
 
 	private IEnumerable<ChatMessage> ObterMensagensNaJanela()
 	{

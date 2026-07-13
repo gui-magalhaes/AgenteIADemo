@@ -3,6 +3,7 @@ using AplicacaoAgenteIA.Constantes;
 using AplicacaoAgenteIA.Core.ConexaoIA.Interfaces;
 using AplicacaoAgenteIA.Core.Contexto;
 using AplicacaoAgenteIA.Core.Contexto.Interfaces;
+using AplicacaoAgenteIA.Core.Rascunho;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using ModelContextProtocol.Client;
@@ -27,11 +28,14 @@ public class ConexaoIAFactory
 			.Build();
 
 		McpClient clienteMcp = await CriarClienteMcpAsync();
-		IList<McpClientTool> ferramentasMcp = await clienteMcp.ListToolsAsync();
 
-		IContextoIA contexto = new ContextoIA(promptSistema);
+		RascunhoConversa rascunho = new();
+		IContextoIA contexto = new ContextoIA(promptSistema, rascunho);
 
-		return new ConexaoIA(cliente, clienteMcp, contexto, ferramentasMcp.Cast<AITool>().ToList());
+		IList<AITool> ferramentas = await CriarListaDeTools(clienteMcp, rascunho);
+
+
+		return new ConexaoIA(cliente, clienteMcp, contexto, ferramentas);
 	}
 
 	private async Task<McpClient> CriarClienteMcpAsync()
@@ -47,6 +51,16 @@ public class ConexaoIAFactory
 				Command = comando,
 				Arguments = argumentos
 			}));
+	}
+
+	private async Task<IList<AITool>> CriarListaDeTools(McpClient clienteMcp, RascunhoConversa rascunho)
+	{
+		IList<McpClientTool> ferramentasMcp = await clienteMcp.ListToolsAsync();
+
+		List<CampoRascunho> campos = await LeitorContratoRascunho.CarregarAsync(clienteMcp);
+		var rascunhoTool = new AtualizarRascunhoTool(rascunho, campos);
+
+		return [.. ferramentasMcp.Cast<AITool>(), rascunhoTool];
 	}
 
 	private ChatClientBuilder CriarClienteBuilder(ProvedorIA provedor)
